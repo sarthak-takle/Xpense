@@ -1,74 +1,84 @@
 import { prisma } from "@/lib/prisma";
+import { currentUser } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
 export async function getAuthenticatedUser() {
-    console.log("[Auth] Using Local DEMO User (No Clerk)");
+    const clerkUser = await currentUser();
 
-    // Hardcoded Demo User for Local Development
-    const demoUser = {
-        id: "user_demo_123",
-        email: "demo@example.com",
-        name: "Demo User"
-    };
+    if (!clerkUser) {
+        return null;
+    }
 
     // Check if user exists in local DB
     const dbUser = await prisma.user.findUnique({
-        where: { email: demoUser.email },
+        where: { email: clerkUser.emailAddresses[0].emailAddress },
         include: { accounts: true }
     });
 
-    let user = dbUser;
+    if (!dbUser) {
+        console.log("[Auth] New User Detected. Syncing...");
+        // valid email check
+        const email = clerkUser.emailAddresses[0].emailAddress;
+        if (!email) return null;
 
-    if (!user) {
-        console.log("[Auth] Creating Demo User in DB...");
-        try {
-            user = await prisma.user.create({
-                data: {
-                    id: demoUser.id,
-                    email: demoUser.email,
-                    name: demoUser.name,
-                },
-                include: { accounts: true }
-            });
-        } catch (e) {
-            console.error("[Auth] Failed to create demo user:", e);
-            throw e;
-        }
+        // Create User
+        const newUser = await prisma.user.create({
+            data: {
+                id: clerkUser.id,
+                email: email,
+                name: `${clerkUser.firstName} ${clerkUser.lastName}`.trim() || 'User',
+                accounts: {
+                    create: { name: 'Cash', type: 'Cash', balance: 0 }
+                }
+            }
+        });
+
+        // Seed Categories safely
+        await seedCategories(newUser.id);
+
+        return newUser;
     }
 
-    // Seed Defaults if no accounts
-    if (user && user.accounts.length === 0) {
-        console.log("[Auth] Seeding default accounts...");
-        await prisma.$transaction(async (tx: any) => {
-            await tx.account.create({
-                data: {
-                    name: "Cash",
-                    type: "Cash",
-                    userId: user.id,
-                    balance: 0,
-                    currency: "INR"
+    return dbUser;
+}
+
+async function seedCategories(userId: string) {
+    const defaults = [
+        { name: 'Food', type: 'expense', color: '#f59e0b', icon: 'Utensils' },
+        { name: 'Transport', type: 'expense', color: '#3b82f6', icon: 'Bus' },
+        { name: 'Bills', type: 'expense', color: '#ef4444', icon: 'Receipt' },
+        { name: 'Shopping', type: 'expense', color: '#ec4899', icon: 'ShoppingBag' },
+        { name: 'Entertainment', type: 'expense', color: '#8b5cf6', icon: 'Film' },
+        { name: 'Health', type: 'expense', color: '#10b981', icon: 'HeartPulse' },
+        { name: 'Salary', type: 'income', color: '#10b981', icon: 'Wallet' },
+        { name: 'Investment', type: 'income', color: '#6366f1', icon: 'TrendingUp' },
+    ]
+
+    console.log(`[Auth] Seeding categories for ${userId}...`);
+
+    // We use upsert to ensure we don't fail if they exist, and the unique constraint
+    // @@unique([userId, name, type]) ensures we don't create duplicates.
+    for (const cat of defaults) {
+        try {
+            await prisma.category.upsert({
+                where: {
+                    userId_name_type: {
+                        userId: userId,
+                        name: cat.name,
+                        type: cat.type
+                    }
+                },
+                update: {}, // Do nothing if exists
+                create: {
+                    name: cat.name,
+                    type: cat.type,
+                    color: cat.color,
+                    icon: cat.icon,
+                    userId: userId
                 }
             })
-
-            const defaults = [
-                { name: 'Food', type: 'expense', color: '#f59e0b', icon: 'Utensils' },
-                { name: 'Transport', type: 'expense', color: '#3b82f6', icon: 'Bus' },
-                { name: 'Bills', type: 'expense', color: '#ef4444', icon: 'Receipt' },
-                { name: 'Shopping', type: 'expense', color: '#ec4899', icon: 'ShoppingBag' },
-                { name: 'Entertainment', type: 'expense', color: '#8b5cf6', icon: 'Film' },
-                { name: 'Health', type: 'expense', color: '#10b981', icon: 'HeartPulse' },
-                { name: 'Salary', type: 'income', color: '#10b981', icon: 'Wallet' },
-                { name: 'Investment', type: 'income', color: '#6366f1', icon: 'TrendingUp' },
-            ]
-
-            for (const cat of defaults) {
-                await tx.category.create({
-                    data: { ...cat, userId: user.id }
-                })
-            }
-        })
-
-        return await prisma.user.findUnique({ where: { id: user.id } })
+        } catch (error) {
+            console.error(`[Auth] Error seeding category ${cat.name}:`, error);
+        }
     }
-
-    return user;
 }
