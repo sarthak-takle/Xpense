@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/Button"
 import Link from "next/link"
 import { Plus } from "lucide-react"
 import { CategoryItem } from "@/components/CategoryItem"
+import { getAuthenticatedUser } from "@/lib/auth"
 
 async function getData() {
-    const user = await prisma.user.findUnique({ where: { email: 'demo@example.com' } })
+    const user = await getAuthenticatedUser()
     if (!user) return []
 
     return await prisma.category.findMany({

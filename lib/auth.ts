@@ -50,8 +50,19 @@ async function seedCategories(userId: string) {
         { name: 'Shopping', type: 'expense', color: '#ec4899', icon: 'ShoppingBag' },
         { name: 'Entertainment', type: 'expense', color: '#8b5cf6', icon: 'Film' },
         { name: 'Health', type: 'expense', color: '#10b981', icon: 'HeartPulse' },
+        { name: 'House', type: 'expense', color: '#10b981', icon: 'Home' },
+        { name: 'Fruits', type: 'expense', color: '#84cc16', icon: 'Apple' },
+        { name: 'Gifts', type: 'expense', color: '#f43f5e', icon: 'Gift' },
+        { name: 'Education', type: 'expense', color: '#6366f1', icon: 'GraduationCap' },
+        { name: 'Taxi', type: 'expense', color: '#eab308', icon: 'Car' },
+        { name: 'Recharges', type: 'expense', color: '#06b6d4', icon: 'Smartphone' },
+        { name: 'Pets', type: 'expense', color: '#d946ef', icon: 'Dog' },
+        { name: 'Miscellaneous', type: 'expense', color: '#64748b', icon: 'MoreHorizontal' },
         { name: 'Salary', type: 'income', color: '#10b981', icon: 'Wallet' },
         { name: 'Investment', type: 'income', color: '#6366f1', icon: 'TrendingUp' },
+        { name: 'Credit', type: 'income', color: '#3b82f6', icon: 'CreditCard' },
+        { name: 'Deposit', type: 'income', color: '#8b5cf6', icon: 'Landmark' },
+        { name: 'Other Income', type: 'income', color: '#64748b', icon: 'MoreHorizontal' },
     ]
 
     console.log(`[Auth] Seeding categories for ${userId}...`);

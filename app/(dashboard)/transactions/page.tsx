@@ -1,9 +1,10 @@
 import { prisma } from "@/lib/prisma"
 import { TransactionList } from "@/components/TransactionList"
 import { TransactionFilters } from "@/components/TransactionFilters"
+import { getAuthenticatedUser } from "@/lib/auth"
 
 async function getData(type?: string, period: string = 'all', dateString?: string) {
-    const user = await prisma.user.findUnique({ where: { email: 'demo@example.com' } })
+    const user = await getAuthenticatedUser()
     if (!user) return []
 
     const where: any = { userId: user.id }

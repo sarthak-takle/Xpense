@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button"
 import Link from "next/link"
 import { Plus } from "lucide-react"
 import { DashboardFilters } from "@/components/DashboardFilters"
+import { UserButton } from "@clerk/nextjs"
 
 async function getData(period: string = 'all', dateString?: string) {
   console.log("--------------- FETCHING DASHBOARD DATA ---------------");
@@ -44,7 +45,7 @@ async function getData(period: string = 'all', dateString?: string) {
       where.date = { gte: start, lte: end }
     }
 
-    // Fetch transactions for Chart & Summary based on filter
+    // Fetch transactions for Chart & Summary based on filtered date
     const filteredTransactions = await prisma.transaction.findMany({
       where,
       orderBy: { date: 'desc' },
@@ -103,13 +104,20 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <div className="flex space-x-2 items-center">
-          <DashboardFilters />
-          <Link href="/add">
-            <Button>
-              <Plus className="mr-2 h-4 w-4" /> Add Transaction
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center justify-between md:justify-start gap-4 w-full md:w-auto">
+          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+          <div className="md:hidden">
+            <UserButton />
+          </div>
+        </div>
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-start sm:items-center w-full md:w-auto">
+          <div className="w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+            <DashboardFilters />
+          </div>
+          <Link href="/add" className="w-full sm:w-auto">
+            <Button className="w-full sm:w-auto">
+              <Plus className="mr-2 h-4 w-4" /> Add
             </Button>
           </Link>
         </div>

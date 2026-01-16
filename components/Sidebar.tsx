@@ -1,5 +1,6 @@
 "use client"
 import Link from 'next/link'
+import { UserButton } from "@clerk/nextjs"
 import { usePathname } from 'next/navigation'
 import { LayoutDashboard, Receipt, Wallet, Settings, PlusCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -46,6 +47,12 @@ export function Sidebar() {
                 })}
             </div>
 
+            <div className="mt-auto px-2 border-t border-gray-800 pt-4">
+                <div className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-900 transition-colors">
+                    <UserButton showName />
+                    <span className="text-sm font-medium text-gray-400">Profile</span>
+                </div>
+            </div>
 
         </aside>
     )
