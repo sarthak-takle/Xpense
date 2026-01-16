@@ -48,9 +48,8 @@ export function Sidebar() {
             </div>
 
             <div className="mt-auto px-2 border-t border-gray-800 pt-4">
-                <div className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-900 transition-colors">
+                <div className="flex items-center justify-center py-2 rounded-lg hover:bg-gray-900 transition-colors">
                     <UserButton showName />
-                    <span className="text-sm font-medium text-gray-400">Profile</span>
                 </div>
             </div>
 

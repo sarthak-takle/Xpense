@@ -13,6 +13,7 @@ export const metadata: Metadata = {
 
 import { ClerkProvider } from "@clerk/nextjs";
 import NextTopLoader from 'nextjs-toploader';
+import { dark } from "@clerk/themes";
 
 export default function RootLayout({
   children,
@@ -20,7 +21,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider appearance={{ baseTheme: dark }}>
       <html lang="en" className="dark" suppressHydrationWarning>
         <body className={inter.className}>
           <NextTopLoader
